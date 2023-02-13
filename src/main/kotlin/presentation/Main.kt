@@ -1,8 +1,13 @@
 package presentation
 
 import core.DispatchersList
+import data.BaseNewsRepository
+import data.CloudDataSource
 import data.CloudService
 import data.ResultDataToDomainMapper
+import data.models.NewsItemData
+import data.models.NewsListData
+import domain.BaseNewsInteractor
 import domain.NewsRepository
 import kotlinx.coroutines.*
 
@@ -50,11 +55,17 @@ fun main() {
 fun main(){
 
     readlnOrNull()
-    val repo = NewsRepository.Base(
-        CloudService.OkHttpService(url),
-        DispatchersList.Base(),
-        ResultDataToDomainMapper.Base())
-    repo.fetchNews { showResult(it) }
+    var interactor = BaseNewsInteractor(
+        repository = BaseNewsRepository(
+            dataSource = CloudDataSource.Base(
+                service = CloudService.OkHttpService(
+                    responseUrl = url)),
+            mapper = ResultDataToDomainMapper.Base(
+                newsMapper = NewsListData.Mapper.ToDomain(
+                    itemMapper = NewsItemData.Mapper.ToDomain(),
+        emptyList()))),
+        dispatchersList = DispatchersList.Base())
+    interactor.allNews { showResult(it) }
     var r = readln()
 }
 

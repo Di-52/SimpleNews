@@ -1,10 +1,7 @@
 package domain
 
-import core.DispatchersList
-import data.CloudService
 import data.models.ResultData
-import data.ResultDataToDomainMapper
-import kotlinx.coroutines.*
+import domain.models.ResultDomain
 
 /**
  * @author Demitrist on 11.02.2023
@@ -12,5 +9,5 @@ import kotlinx.coroutines.*
 
 interface NewsRepository {
 
-    fun fetchNews(callback: (String) -> Unit)
+    suspend fun fetchNews(): ResultDomain
 }

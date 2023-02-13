@@ -1,5 +1,6 @@
 package data
 
+import NewsListDomain
 import data.models.NewsListData
 import domain.models.DomainError
 import domain.models.ResultDomain
@@ -16,14 +17,14 @@ interface ResultDataToDomainMapper {
     fun map(data: NewsListData): ResultDomain
     fun map(e: Exception): ResultDomain
 
-    class Base() : ResultDataToDomainMapper {
+    class Base(private val newsMapper:NewsListData.Mapper<NewsListDomain>) : ResultDataToDomainMapper {
 
         override fun map(data: NewsListData): ResultDomain {
-            val result = data.map(NewsListDataToDomainMapper.Base(NewsItemDataToDomainMapper.Base()))
+            val result = data.map(newsMapper)
             return if (result.haveNoNews())
                 ResultDomain.Fail(error = DomainError.NoResult(location = result.location()))
             else
-                ResultDomain.Success(result = result)
+                ResultDomain.Success(news = result)
         }
 
         override fun map(e: Exception): ResultDomain {

@@ -1,75 +1,91 @@
-
 /**
  * @author Demitrist on 10.02.2023
  **/
 
-
 class NewsListDomain(
-    private val location: String,
     private val name: String,
+    private val location: String,
     private val news: List<NewsItemDomain>,
     private val keywords: List<String>
 ) : Content {
     override fun haveNoNews() = news.isEmpty()
     override fun location() = location
+
+    interface Mapper<T> {
+        fun map(name: String, location: String, news: List<NewsItemDomain>, keywords: List<String>): T
+
+        class Filter(
+            private val filters: List<NewsItemDomain.Mapper<Boolean>>,
+        ) : Mapper<NewsListDomain> {
+            override fun map(
+                name: String,
+                location: String,
+                news: List<NewsItemDomain>,
+                keywords: List<String>
+            ): NewsListDomain {
+                val filteredNews = mutableListOf<NewsItemDomain>()
+                news.forEach { newsItem ->
+                    var isMatch = true
+                    filters.forEach { filter ->
+                        isMatch = isMatch && newsItem.map(filter)
+                    }
+                    if (isMatch) filteredNews.add(newsItem)
+                }
+                return NewsListDomain(name = name, location = location, news = filteredNews, keywords = keywords)
+            }
+        }
+
+        class Sorter(private val sortOrderDesc: Boolean) :
+            Mapper<NewsListDomain> {
+            override fun map(
+                name: String,
+                location: String,
+                news: List<NewsItemDomain>,
+                keywords: List<String>
+            ): NewsListDomain {
+                val sortedNews = news.toMutableList()
+                val expected = if (sortOrderDesc) -1 else 1
+                var ret = 1
+                while (ret > 0) {
+                    ret = 0
+                    for (i in 0 until sortedNews.size) {
+                        if (sortedNews[i].map(NewsItemDomain.Mapper.CompareDate(sortedNews[i + 1])) == expected) {
+                            ret++
+                            val temp = sortedNews[i]
+                            sortedNews[i] = sortedNews[i + 1]
+                            sortedNews[i + 1] = temp
+                        }
+                    }
+                }
+                return NewsListDomain(name = name, location = location, news = sortedNews, keywords = keywords)
+            }
+
+        }
+
+        class ToString(private val itemMapper: NewsItemDomain.Mapper<String>) : Mapper<String> {
+            override fun map(
+                name: String,
+                location: String,
+                news: List<NewsItemDomain>,
+                keywords: List<String>
+            ): String {
+                var result = ""
+                if (news.size > 0) {
+                    result += "News from $location...\n\n"
+                    result += "$name \n\n"
+                    news.forEach { result += "${it.map(itemMapper)} \n" }
+                } else
+                    result += "In $location hasn't any news..."
+                return result
+            }
+        }
+    }
+
+    fun <T> map(mapper: Mapper<T>): T = mapper.map(name = name, location = location, news = news, keywords = keywords)
 }
 
 interface Content {
+
     fun haveNoNews(): Boolean
-    fun location():String
+    fun location(): String
 }
-
-/*
-class NewsList(
-    private val location: String,
-    private val name: String,
-    private val news: List<NewsItem>,
-    private val keywords: List<String>
-) : Abstract.MappableObject<String, NewsListToStringMapper>, Filterable, Sortable {
-    private val keys = arrayListOf<String>()
-    private val sorting = arrayListOf<SortOrder>()
-
-    fun keywords() = keywords
-    override fun map(mapper: NewsListToStringMapper): String {
-        var actualNews = news.toMutableList()
-        if (keys.isNotEmpty()) {
-            news.forEach { newsItem ->
-                var comp = true
-                keys.forEach { key ->
-                    comp = comp && newsItem.checkKeyword(key = key)
-                }
-                if (!comp) actualNews.remove(newsItem)
-            }
-        }
-        if (sorting.isNotEmpty())
-            when (sorting[0]) {
-                SortOrder.DATE_ASK -> actualNews.sortBy { it.provideDate() }
-                SortOrder.DATE_DESC -> actualNews.sortByDescending { it.provideDate() }
-            }
-        return mapper.map(location, name, actualNews)
-    }
-
-    override fun byKeyword(key: String) {
-        if (key.isEmpty()) keys.clear()
-        else keys.add(key)
-    }
-
-    override fun sort(order: SortOrder) {
-        sorting.clear()
-        sorting.add(order)
-    }
-
-
-}
-
-interface Filterable {
-    fun byKeyword(key: String)
-}
-
-interface Sortable {
-    fun sort(order: SortOrder)
-}
-
-enum class SortOrder { DATE_ASK, DATE_DESC }
-
-*/
