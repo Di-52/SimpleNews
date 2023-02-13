@@ -1,3 +1,7 @@
+package data
+
+import NewsItemDomain
+import core.Mapper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -5,7 +9,7 @@ import java.time.format.DateTimeFormatter
  * @author Demitrist on 10.02.2023
  **/
 
-interface ResponseNewsItemToNewsItemMapper : Abstract.Mapper {
+interface NewsItemDataToDomainMapper : Mapper {
 
     fun map(
         id: Int,
@@ -14,10 +18,9 @@ interface ResponseNewsItemToNewsItemMapper : Abstract.Mapper {
         date: String,
         keywords: List<String>,
         visible: Boolean
-    ): NewsItem
+    ): NewsItemDomain
 
-    //
-    class Base : ResponseNewsItemToNewsItemMapper {
+    class Base : NewsItemDataToDomainMapper {
         override fun map(
             id: Int,
             title: String,
@@ -25,9 +28,9 @@ interface ResponseNewsItemToNewsItemMapper : Abstract.Mapper {
             date: String,
             keywords: List<String>,
             visible: Boolean
-        ): NewsItem {
+        ): NewsItemDomain {
             val dateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("uuuu-MM-dd kk:mm:ss xxxx"))
-            return NewsItem(id, title, description, dateTime, keywords, visible)
+            return NewsItemDomain(id, title, description, dateTime, keywords, visible)
         }
     }
 }

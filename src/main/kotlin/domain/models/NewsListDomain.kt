@@ -1,7 +1,25 @@
+
 /**
  * @author Demitrist on 10.02.2023
  **/
 
+
+class NewsListDomain(
+    private val location: String,
+    private val name: String,
+    private val news: List<NewsItemDomain>,
+    private val keywords: List<String>
+) : Content {
+    override fun haveNoNews() = news.isEmpty()
+    override fun location() = location
+}
+
+interface Content {
+    fun haveNoNews(): Boolean
+    fun location():String
+}
+
+/*
 class NewsList(
     private val location: String,
     private val name: String,
@@ -53,3 +71,5 @@ interface Sortable {
 }
 
 enum class SortOrder { DATE_ASK, DATE_DESC }
+
+*/

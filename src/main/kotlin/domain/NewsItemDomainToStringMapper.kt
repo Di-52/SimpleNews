@@ -1,14 +1,17 @@
+package domain
+
+import core.Mapper
 import java.time.LocalDateTime
 
 /**
  * @author Demitrist on 11.02.2023
  **/
 
-interface NewsItemToStringMapper : Abstract.Mapper {
+interface NewsItemDomainToStringMapper : Mapper {
 
     fun map(id:Int,title: String, description: String, date: LocalDateTime, keywords: List<String>): String
 
-    class Base : NewsItemToStringMapper {
+    class Base : NewsItemDomainToStringMapper {
         override fun map(id:Int,title: String, description: String, date: LocalDateTime, keywords: List<String>): String {
             var dateString = "" + date.dayOfMonth + " " + date.month.toString()
                 .lowercase() + " " + date.year + " at " + date.hour + ":" + if(date.minute< 10) "00" else ""+date.minute
