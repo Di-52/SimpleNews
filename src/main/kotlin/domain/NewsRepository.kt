@@ -1,6 +1,5 @@
 package domain
 
-import data.models.ResultData
 import domain.models.ResultDomain
 
 /**

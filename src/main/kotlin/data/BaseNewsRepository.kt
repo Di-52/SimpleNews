@@ -7,7 +7,7 @@ import domain.NewsRepository
  **/
 
 class BaseNewsRepository(
-    private val dataSource: CloudDataSource,
+    private val dataSource: DataSource,
     private val mapper: ResultDataToDomainMapper
 ) : NewsRepository {
 
