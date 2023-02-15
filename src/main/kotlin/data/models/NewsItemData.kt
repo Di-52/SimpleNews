@@ -35,5 +35,12 @@ class NewsItemData(
         }
     }
 
-    fun <T> map(mapper: Mapper<T>): T = mapper.map(id, title, description, date, keywords, visible)
+    fun <T> map(mapper: Mapper<T>): T = mapper.map(
+        id = id,
+        title = title,
+        description = description,
+        date = date,
+        keywords = keywords,
+        visible = visible
+    )
 }
