@@ -7,22 +7,17 @@ import kotlinx.coroutines.*
  * @author Demitrist on 13.02.2023
  **/
 
-interface CloudDataSource {
+class CloudDataSource(private val service: CloudService) : DataSource {
 
-    suspend fun fetchData(): ResultData
-
-    class Base(private val service: CloudService) : CloudDataSource {
-
-        override suspend fun fetchData(): ResultData {
-            val result: ResultData = try {
-                withTimeout(5000) {
-                    delay(1)
-                    service.fetch()
-                }
-            } catch (e: Exception) {
-                ResultData.Fail(e)
+    override suspend fun fetchData(): ResultData {
+        val result: ResultData = try {
+            withTimeout(5000) {
+                delay(1)
+                service.fetch()
             }
-            return result
+        } catch (e: Exception) {
+            ResultData.Fail(e)
         }
+        return result
     }
 }
