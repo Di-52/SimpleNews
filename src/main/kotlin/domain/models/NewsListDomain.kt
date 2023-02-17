@@ -10,6 +10,7 @@ class NewsListDomain(
 ) : Content {
     override fun haveNoNews() = news.isEmpty()
     override fun location() = location
+    override fun keywords() = keywords
 
     interface Mapper<T> {
         fun map(name: String, location: String, news: List<NewsItemDomain>, keywords: List<String>): T
@@ -48,7 +49,7 @@ class NewsListDomain(
                 var ret = 1
                 while (ret > 0) {
                     ret = 0
-                    for (i in 0 until sortedNews.size) {
+                    for (i in 0 until sortedNews.size - 1) {
                         if (sortedNews[i].map(NewsItemDomain.Mapper.CompareDate(sortedNews[i + 1])) == expected) {
                             ret++
                             val temp = sortedNews[i]
@@ -71,8 +72,7 @@ class NewsListDomain(
             ): String {
                 var result = ""
                 if (news.size > 0) {
-                    result += "News from $location...\n\n"
-                    result += "$name \n\n"
+                    result += "\n\n$name from $location: \n\n"
                     news.forEach { result += "${it.map(itemMapper)} \n" }
                 } else
                     result += "In $location hasn't any news..."
@@ -88,4 +88,5 @@ interface Content {
 
     fun haveNoNews(): Boolean
     fun location(): String
+    fun keywords(): List<String>
 }

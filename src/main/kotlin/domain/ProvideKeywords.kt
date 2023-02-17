@@ -1,4 +1,4 @@
-package domain.models
+package domain
 
 /**
  * @author Demitrist on 13.02.2023

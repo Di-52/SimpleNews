@@ -13,6 +13,7 @@ interface ResultDomain {
     fun map(resultMapper: ResultDomainToUiMapper): ResultUi
     fun filteredNews(mapper: NewsListDomain.Mapper.Filter): ResultDomain
     fun sortedNews(mapper: NewsListDomain.Mapper.Sorter): ResultDomain
+    fun keywords(): List<String>
 
     data class Success(private val news: NewsListDomain) : ResultDomain {
 
@@ -28,6 +29,8 @@ interface ResultDomain {
             val sortedNews = news.map(mapper)
             return Success(sortedNews)
         }
+
+        override fun keywords() = news.keywords()
     }
 
     data class Fail(private val error: DomainError) : ResultDomain {
@@ -35,6 +38,8 @@ interface ResultDomain {
         override fun map(resultMapper: ResultDomainToUiMapper) = resultMapper.map(error)
         override fun filteredNews(mapper: NewsListDomain.Mapper.Filter) = Fail(error)
         override fun sortedNews(mapper: NewsListDomain.Mapper.Sorter) = Fail(error)
+        override fun keywords(): List<String> = emptyList()
+
     }
 
 

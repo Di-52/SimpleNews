@@ -1,4 +1,4 @@
-import domain.models.ProvideKeywords
+import domain.ProvideKeywords
 import java.time.LocalDateTime
 
 /**
@@ -27,7 +27,7 @@ class NewsItemDomain(
             visible: Boolean
         ): T
 
-        class CompareDate(private val other: NewsItemDomain) : NewsItemDomain.Mapper<Int> {
+        class CompareDate(private val other: NewsItemDomain) : Mapper<Int> {
             override fun map(
                 id: Int,
                 title: String,
@@ -38,7 +38,7 @@ class NewsItemDomain(
             ) = other.compareByDate(date)
         }
 
-        class MatchAllKeywords(private val keys: List<String>) : NewsItemDomain.Mapper<Boolean> {
+        class MatchAllKeywords(private val keys: List<String>) : Mapper<Boolean> {
             override fun map(
                 id: Int,
                 title: String,
@@ -49,7 +49,7 @@ class NewsItemDomain(
             ) = keywords.containsAll(keys)
         }
 
-        class MatchAnyKeyword(private val keys: List<String>) : NewsItemDomain.Mapper<Boolean> {
+        class MatchAnyKeyword(private val keys: List<String>) : Mapper<Boolean> {
             override fun map(
                 id: Int,
                 title: String,
@@ -58,13 +58,14 @@ class NewsItemDomain(
                 keywords: List<String>,
                 visible: Boolean
             ): Boolean {
+                if (keys.size == 0) return true
                 var result = false
                 keys.forEach { result = result || keywords.contains(it) }
                 return result
             }
         }
 
-        class MatchVisibility(private val isVisible: Boolean = true) : NewsItemDomain.Mapper<Boolean> {
+        class MatchVisibility(private val isVisible: Boolean = true) : Mapper<Boolean> {
             override fun map(
                 id: Int,
                 title: String,
@@ -84,22 +85,23 @@ class NewsItemDomain(
                 keywords: List<String>,
                 visible: Boolean
             ): String {
-                var dateString = "" + date.dayOfMonth + " " + date.month.toString()
+                val dateString = "" + date.dayOfMonth + " " + date.month.toString()
                     .lowercase() + " " + date.year + " at " + date.hour + ":" + if (date.minute < 10) "00" else "" + date.minute
-                var result = "$id - \n"
-                result += "\t$title ($dateString)\n"
-                result += "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-                result += description + "\n"
-                result += "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+                var result = ""
+                result += "[$id] "
+                result += " $dateString"
+                result += "\n${title.uppercase()}\n"
+                result += "\n"
+                result += "\t$description\n"
+                result += "\n"
                 if (keywords.size > 0) {
                     result += "Keys: "
                     keywords.forEach { result += "[$it] " }
-                    result += "\n"
+                    result += "\n\n-------------------------------"
                 }
-                result += "\n\n"
+                result += "\n"
                 return result
             }
-
         }
     }
 
@@ -111,4 +113,3 @@ class NewsItemDomain(
 
     fun <T> map(mapper: Mapper<T>): T = mapper.map(id, title, description, date, keywords, visible)
 }
-
