@@ -6,7 +6,7 @@ package domain.models
 
 interface DomainError {
 
-    class ConnectionError(val message: String) : DomainError
-    class NoResult(val location: String) : DomainError
-    object GenericError : DomainError
+    data class ConnectionError(val message: String) : DomainError
+    data class NoResult(val location: String) : DomainError
+    data class GenericError(val message: String) : DomainError
 }

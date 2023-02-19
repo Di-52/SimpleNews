@@ -29,8 +29,9 @@ interface ResultDataToDomainMapper {
 
         override fun map(e: Exception): ResultDomain {
             val message = when (e) {
+                is NoDataException -> DomainError.GenericError(e.message?:"NoDataException")
                 is TimeoutCancellationException -> DomainError.ConnectionError(message = "Timed out of response")
-                is IllegalStateException -> DomainError.GenericError
+                is IllegalStateException -> DomainError.GenericError("Something went wrong")
                 is ConnectionShutdownException -> DomainError.ConnectionError(message = "Server closed connection")
                 is IOException -> DomainError.ConnectionError(message = "Server is unreachable")
                 else -> DomainError.ConnectionError(message = "Server is unreachable")
