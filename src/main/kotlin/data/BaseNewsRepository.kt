@@ -22,7 +22,9 @@ class BaseNewsRepository(
         else
         {
             result = cloud.fetchData()
-            cache.save(result)
+            if (result.isSuccess()){
+                cache.save(result)
+            }
         }
         return result.map(mapper = mapper)
     }
