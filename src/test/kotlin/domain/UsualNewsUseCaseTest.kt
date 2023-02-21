@@ -87,54 +87,55 @@ class UsualNewsUseCaseTest {
         assertEquals(expected = 1, actual = dispatchers.dispatcherUiCalledCount)
         assertEquals(expected = 1, actual = callback.invokeCount)
     }
-}
 
-private class Callback : (String) -> Unit {
-    var invokeCount = 0
 
-    override fun invoke(p1: String) {
-        invokeCount++
-    }
-}
+    private class Callback : (String) -> Unit {
+        var invokeCount = 0
 
-private class FakeMapper : ResultDomainToUiMapper {
-    var result: ResultUi? = null
-    val inputData = mutableListOf<NewsListDomain>()
-    val inputErrors = mutableListOf<DomainError>()
-
-    override fun map(data: NewsListDomain): ResultUi {
-        inputData.add(data)
-        return result!!
+        override fun invoke(p1: String) {
+            invokeCount++
+        }
     }
 
-    override fun map(error: DomainError): ResultUi {
-        inputErrors.add(error)
-        return result!!
+    private class FakeMapper : ResultDomainToUiMapper {
+        var result: ResultUi? = null
+        val inputData = mutableListOf<NewsListDomain>()
+        val inputErrors = mutableListOf<DomainError>()
+
+        override fun map(data: NewsListDomain): ResultUi {
+            inputData.add(data)
+            return result!!
+        }
+
+        override fun map(error: DomainError): ResultUi {
+            inputErrors.add(error)
+            return result!!
+        }
     }
-}
 
-private class FakeDispatchers : DispatchersList {
-    val dispatcher = TestCoroutineDispatcher()
+    private class FakeDispatchers : DispatchersList {
+        val dispatcher = TestCoroutineDispatcher()
 
-    var dispatcherIoCalledCount = 0
-    override fun io(): CoroutineDispatcher {
-        dispatcherIoCalledCount++
-        return dispatcher
+        var dispatcherIoCalledCount = 0
+        override fun io(): CoroutineDispatcher {
+            dispatcherIoCalledCount++
+            return dispatcher
+        }
+
+        var dispatcherUiCalledCount = 0
+        override fun ui(): CoroutineDispatcher {
+            dispatcherUiCalledCount++
+            return dispatcher
+        }
     }
 
-    var dispatcherUiCalledCount = 0
-    override fun ui(): CoroutineDispatcher {
-        dispatcherUiCalledCount++
-        return dispatcher
-    }
-}
+    private class FakeRepository : NewsRepository {
+        var result: ResultDomain? = null
+        var repositoryCalledCount = 0
 
-private class FakeRepository : NewsRepository {
-    var result: ResultDomain? = null
-    var repositoryCalledCount = 0
-
-    override suspend fun fetchNews(): ResultDomain {
-        repositoryCalledCount++
-        return result!!
+        override suspend fun fetchNews(): ResultDomain {
+            repositoryCalledCount++
+            return result!!
+        }
     }
 }
