@@ -5,7 +5,7 @@ import java.time.LocalDateTime
  * @author Demitrist on 10.02.2023
  **/
 
-class NewsItemDomain(
+data class NewsItemDomain(
     private val id: Int,
     private val title: String,
     private val description: String,

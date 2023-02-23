@@ -1,8 +1,10 @@
+import domain.models.Content
+
 /**
  * @author Demitrist on 10.02.2023
  **/
 
-class NewsListDomain(
+data class NewsListDomain(
     private val name: String,
     private val location: String,
     private val news: List<NewsItemDomain>,
@@ -82,11 +84,4 @@ class NewsListDomain(
     }
 
     fun <T> map(mapper: Mapper<T>): T = mapper.map(name = name, location = location, news = news, keywords = keywords)
-}
-
-interface Content {
-
-    fun haveNoNews(): Boolean
-    fun location(): String
-    fun keywords(): List<String>
 }
