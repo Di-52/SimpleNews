@@ -61,8 +61,4 @@ interface MenuCommand {
             exitProcess(1)
         }
     }
-
-    object Empty : MenuCommand {
-        override fun execute(param: String) = Unit
-    }
 }

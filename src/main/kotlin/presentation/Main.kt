@@ -7,13 +7,10 @@ import data.*
 import data.models.NewsItemData
 import data.models.NewsListData
 import domain.*
-import kotlinx.coroutines.delay
 
 /**
  * @author Demitrist on 11.02.2023
  **/
-
-private val url = "https://api2.kiparo.com/static/it_news.json"
 
 fun main() {
     val m = Main()
@@ -21,11 +18,6 @@ fun main() {
     while (true){
 
     }
-}
-
-
-fun showResult(str: String) {
-    println(str)
 }
 
 class Main() {
@@ -67,7 +59,7 @@ class Main() {
         resultDataMapper = ResultDataToDomainMapper.Base(newsMapper = newsListDataMapper)
         repository = BaseNewsRepository(cloud = cloudDataSource, cache = cacheDataSource, mapper = resultDataMapper)
 
-        var output: (String) -> Unit = { defaultOutput(it) }
+        val output: (String) -> Unit = { defaultOutput(it) }
         dispatchers = DispatchersList.Base()
         newsItemDomainMapper = NewsItemDomain.Mapper.ToString()
         newsListDomainMapper = NewsListDomain.Mapper.ToString(itemMapper = newsItemDomainMapper)
@@ -89,8 +81,8 @@ class Main() {
             repository = repository,
             dispatchers = dispatchers
         )
-        parserInput = InputParser()
-        handlerUsersInput = UserInput(parser = parserInput)
+        parserInput = InputParser.Base()
+        handlerUsersInput = UserInput.Base(parser = parserInput)
         allNewsCommand = MenuCommand.AllNews(useCase = usualNewsUseCase)
         specialNewsCommand = MenuCommand.SpecialNews(useCase = specialNewsUseCase)
         addKeywordCommand = MenuCommand.AddKeyword(useCase = specialNewsUseCase)
@@ -118,7 +110,7 @@ class Main() {
         mainMenu.showForResult()
     }
 
-    fun defaultOutput(text: String) {
+    private fun defaultOutput(text: String) {
         println(text)
         mainMenu.showForResult()
     }
