@@ -1,9 +1,12 @@
 package data
 
-import NewsListDomain
 import data.models.NewsListData
-import domain.models.DomainError
+import data.models.NewsListDataToDomainMapper
+import domain.models.ConnectionDomainError
+import domain.models.FailResultDomain
+import domain.models.GenericDomainError
 import domain.models.ResultDomain
+import domain.models.SuccessResultDomain
 import kotlinx.coroutines.TimeoutCancellationException
 import okhttp3.internal.http2.ConnectionShutdownException
 import okio.IOException
@@ -12,30 +15,21 @@ import okio.IOException
  * @author Demitrist on 11.02.2023
  **/
 
-interface ResultDataToDomainMapper {
+class ResultDataToDomainMapper(
+    private val newsMapper: NewsListDataToDomainMapper
+) {
 
-    fun map(data: NewsListData): ResultDomain
-    fun map(e: Exception): ResultDomain
+    fun map(data: NewsListData) = SuccessResultDomain(data.map(newsMapper))
 
-    class Base(private val newsMapper:NewsListData.Mapper<NewsListDomain>) : ResultDataToDomainMapper {
-
-        override fun map(data: NewsListData): ResultDomain {
-            val result = data.map(newsMapper)
-            return if (result.haveNoNews())
-                ResultDomain.Fail(error = DomainError.NoResult(location = result.location()))
-            else
-                ResultDomain.Success(news = result)
+    fun map(e: Exception): ResultDomain {
+        val message = when (e) {
+            is NoDataException -> GenericDomainError(e.message ?: "NoDataException")
+            is TimeoutCancellationException -> ConnectionDomainError(message = "Timed out of response")
+            is IllegalStateException -> GenericDomainError("Something went wrong")
+            is ConnectionShutdownException -> ConnectionDomainError(message = "Server closed connection")
+            is IOException -> ConnectionDomainError(message = "Server is unreachable")
+            else -> ConnectionDomainError(message = "Server is unreachable")
         }
-
-        override fun map(e: Exception): ResultDomain {
-            val message = when (e) {
-                is TimeoutCancellationException -> DomainError.ConnectionError(message = "Timed out of response")
-                is IllegalStateException -> DomainError.GenericError
-                is ConnectionShutdownException -> DomainError.ConnectionError(message = "Server closed connection")
-                is IOException -> DomainError.ConnectionError(message = "Server is unreachable")
-                else -> DomainError.ConnectionError(message = "Server is unreachable")
-            }
-            return ResultDomain.Fail(message)
-        }
+        return FailResultDomain(message)
     }
 }

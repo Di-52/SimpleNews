@@ -1,7 +1,8 @@
 package data
 
 import data.models.ResultData
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 
 /**
  * @author Demitrist on 13.02.2023
@@ -16,7 +17,7 @@ class CloudDataSource(private val service: CloudService) : DataSource {
                 service.fetch()
             }
         } catch (e: Exception) {
-            ResultData.Fail(e)
+            FailResultData(e)
         }
         return result
     }

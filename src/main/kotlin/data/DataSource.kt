@@ -9,9 +9,4 @@ import data.models.ResultData
 interface DataSource {
 
     suspend fun fetchData(): ResultData
-
-    interface Mutable :DataSource {
-        fun save(dataToSave: ResultData)
-        fun haveData():Boolean
-    }
 }

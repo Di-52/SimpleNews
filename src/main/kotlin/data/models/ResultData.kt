@@ -11,11 +11,5 @@ interface ResultData {
 
     fun map(mapper: ResultDataToDomainMapper): ResultDomain
 
-    data class Success(private val data: NewsListData) : ResultData {
-        override fun map(mapper: ResultDataToDomainMapper) = mapper.map(data)
-    }
-
-    data class Fail(private val e: Exception) : ResultData {
-        override fun map(mapper: ResultDataToDomainMapper) = mapper.map(e)
-    }
+    fun isSuccess(): Boolean
 }
