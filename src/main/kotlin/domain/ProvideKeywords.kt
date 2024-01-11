@@ -5,5 +5,6 @@ package domain
  **/
 
 interface ProvideKeywords {
+
     fun keywords(list: ArrayList<String>)
 }

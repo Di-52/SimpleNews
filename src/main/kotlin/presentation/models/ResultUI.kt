@@ -5,5 +5,6 @@ package presentation.models
  **/
 
 data class ResultUi(private val text:String){
+
     fun map() = text
 }
