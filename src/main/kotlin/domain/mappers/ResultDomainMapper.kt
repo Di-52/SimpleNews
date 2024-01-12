@@ -1,8 +1,8 @@
 package domain.mappers
 
 import NewsListDomain
-import domain.models.DomainError
-import presentation.models.ResultUi
+import domain.models.errors.DomainError
+import presentation.models.ResultUI
 
 /**
  * @author Demitrist on 12.02.2023
@@ -10,7 +10,7 @@ import presentation.models.ResultUi
 
 interface ResultDomainMapper {
 
-    fun map(data: NewsListDomain): ResultUi
+    fun map(data: NewsListDomain): ResultUI
 
-    fun map(error: DomainError): ResultUi
+    fun map(error: DomainError): ResultUI
 }

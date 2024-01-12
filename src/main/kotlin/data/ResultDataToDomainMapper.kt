@@ -2,9 +2,9 @@ package data
 
 import data.models.NewsListData
 import data.models.NewsListDataToDomainMapper
-import domain.models.ConnectionDomainError
+import domain.models.errors.ConnectionDomainError
 import domain.models.FailResultDomain
-import domain.models.GenericDomainError
+import domain.models.errors.GenericDomainError
 import domain.models.ResultDomain
 import domain.models.SuccessResultDomain
 import kotlinx.coroutines.TimeoutCancellationException
