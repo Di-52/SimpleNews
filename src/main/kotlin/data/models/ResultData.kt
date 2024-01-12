@@ -10,15 +10,6 @@ import domain.models.ResultDomain
 interface ResultData {
 
     fun map(mapper: ResultDataToDomainMapper): ResultDomain
+
     fun isSuccess(): Boolean
-
-    data class Success(private val data: NewsListData) : ResultData {
-        override fun map(mapper: ResultDataToDomainMapper) = mapper.map(data)
-        override fun isSuccess() = true
-    }
-
-    data class Fail(private val e: Exception) : ResultData {
-        override fun map(mapper: ResultDataToDomainMapper) = mapper.map(e)
-        override fun isSuccess() = false
-    }
 }

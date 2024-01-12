@@ -3,7 +3,7 @@ package domain.models
 import domain.mappers.ResultDomainMapper
 import domain.mappers.NewsSeparator
 import domain.mappers.NewsSorter
-import presentation.models.ResultUi
+import presentation.models.ResultUI
 
 /**
  * @author Demitrist on 11.02.2023
@@ -11,7 +11,7 @@ import presentation.models.ResultUi
 
 interface ResultDomain {
 
-    fun map(resultMapper: ResultDomainMapper): ResultUi
+    fun map(resultMapper: ResultDomainMapper): ResultUI
 
     fun filteredNews(mapper: NewsSeparator): ResultDomain
 

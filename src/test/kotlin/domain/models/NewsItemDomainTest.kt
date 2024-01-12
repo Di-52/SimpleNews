@@ -1,6 +1,7 @@
 package domain.models
 
 import NewsItemDomain
+import domain.mappers.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
@@ -10,7 +11,7 @@ import kotlin.test.assertEquals
  */
 
 class NewsItemDomainTest {
-    private lateinit var matcher: NewsItemDomain.Mapper<Boolean>
+    private lateinit var matcher: NewsItemDomainMapper<Boolean>
     private val date = LocalDateTime.now()
     private val item = NewsItemDomain(
         id = 1,
@@ -58,7 +59,7 @@ class NewsItemDomainTest {
     fun test_news_item_match_any_keyword() {
         val expected = listOf(false, true, true)
         keys.forEachIndexed { index, key ->
-            matcher = NewsItemDomain.Mapper.MatchAnyKeyword(key)
+            matcher = NewsItemMatchAnyKeyword(key)
 
             val result = item.map(mapper = matcher)
 
@@ -70,7 +71,7 @@ class NewsItemDomainTest {
     fun test_news_item_match_all_keywords() {
         val expected = listOf(false, false, true)
         keys.forEachIndexed { index, key ->
-            matcher = NewsItemDomain.Mapper.MatchAllKeywords(key)
+            matcher = NewsItemMatchAllKeywords(key)
 
             val result = item.map(mapper = matcher)
 
@@ -81,7 +82,7 @@ class NewsItemDomainTest {
     @Test
     fun test_news_item_match_visibility() {
         val expected = true
-        matcher = NewsItemDomain.Mapper.MatchVisibility()
+        matcher = NewsItemMatchVisibility()
 
         val result = item.map(mapper = matcher)
 
@@ -90,17 +91,17 @@ class NewsItemDomainTest {
 
     @Test
     fun test_news_item_compare_date_mapper() {
-        var comparator = NewsItemDomain.Mapper.CompareDate(other = otherItem(date.plusNanos(1)))
+        var comparator = NewsItemCompareDate(other = otherItem(date.plusNanos(1)))
         var result = item.map(comparator)
 
         assertEquals(expected = 1, actual = result)
 
-        comparator = NewsItemDomain.Mapper.CompareDate(other = otherItem(date.minusNanos(1)))
+        comparator = NewsItemCompareDate(other = otherItem(date.minusNanos(1)))
         result = item.map(comparator)
 
         assertEquals(expected = -1, actual = result)
 
-        comparator = NewsItemDomain.Mapper.CompareDate(other = otherItem(date))
+        comparator = NewsItemCompareDate(other = otherItem(date))
         result = item.map(comparator)
 
         assertEquals(expected = 0, actual = result)

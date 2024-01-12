@@ -12,9 +12,9 @@ import kotlin.test.assertEquals
  */
 
 class CacheDataSourceTest {
-    private lateinit var dataSource: DataSource.Mutable
-    private val data = ResultData.Success(NewsListData("name", "location", emptyList()))
-    private val data2 = ResultData.Success(NewsListData("name2", "location2", emptyList()))
+    private lateinit var dataSource: MutableDataSource
+    private val data = SuccessResultData(NewsListData("name", "location", emptyList()))
+    private val data2 = SuccessResultData(NewsListData("name2", "location2", emptyList()))
 
     @BeforeEach
     fun setup() {
@@ -23,7 +23,7 @@ class CacheDataSourceTest {
 
     @Test
     fun test_read_no_data() = runBlocking {
-        val expected = ResultData.Fail(NoDataException("Try to read empty cache"))
+        val expected = FailResultData(NoDataException("Try to read empty cache"))
         val actual = dataSource.fetchData()
         assertEquals(expected = expected, actual = actual)
     }

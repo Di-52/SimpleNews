@@ -2,6 +2,9 @@ package domain.models
 
 import NewsItemDomain
 import NewsListDomain
+import domain.mappers.NewsItemDomainMapper
+import domain.mappers.NewsSeparator
+import domain.mappers.NewsSorter
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
@@ -28,7 +31,7 @@ class NewsListDomainTest {
         val fakeFilter = FakeFilter()
         fakeFilter.trueResultsCount = 2
         val filters = mutableListOf(fakeFilter)
-        val filter = NewsListDomain.Mapper.Filter(filters)
+        val filter = NewsSeparator(filters)
         val expected = NewsListDomain(
             name = "name",
             location = "location",
@@ -53,7 +56,7 @@ class NewsListDomainTest {
         val fakeFilter2 = FakeFilter()
         fakeFilter2.trueResultsCount = 1
         val filters = mutableListOf(fakeFilter1, fakeFilter2)
-        val filter = NewsListDomain.Mapper.Filter(filters)
+        val filter = NewsSeparator(filters)
         val expected = NewsListDomain(
             name = "name",
             location = "location",
@@ -71,7 +74,7 @@ class NewsListDomainTest {
 
     @Test
     fun test_sorting_by_desc() {
-        val sorter = NewsListDomain.Mapper.Sorter(sortOrderDesc = true)
+        val sorter = NewsSorter(sortOrderDesc = true)
         val expected = NewsListDomain(
             name = "name",
             location = "location",
@@ -89,7 +92,7 @@ class NewsListDomainTest {
 
     @Test
     fun test_sorting_by_asc() {
-        val sorter = NewsListDomain.Mapper.Sorter(sortOrderDesc = false)
+        val sorter = NewsSorter(sortOrderDesc = false)
         val expected = NewsListDomain(
             name = "name",
             location = "location",
@@ -116,7 +119,7 @@ class NewsListDomainTest {
         )
     }
 
-    private class FakeFilter : NewsItemDomain.Mapper<Boolean> {
+    private class FakeFilter : NewsItemDomainMapper<Boolean> {
         val inputs = mutableListOf<String>()
         var trueResultsCount: Int? = null
 

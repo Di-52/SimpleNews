@@ -1,10 +1,11 @@
 package data
 
-import NewsListDomain
+import data.models.NewsItemDataToDomainMapper
 import data.models.NewsListData
+import data.models.NewsListDataToDomainMapper
 import data.models.ResultData
-import domain.models.DomainError
-import domain.models.ResultDomain
+import domain.models.*
+import domain.models.errors.GenericDomainError
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -21,9 +22,9 @@ class CloudDataSourceTest {
         val service = FakeService()
         val dataSource = CloudDataSource(service)
         val newsList = NewsListData(name = "name", location = "location", news = emptyList())
-        service.result = ResultData.Success(newsList)
+        service.result = SuccessResultData(newsList)
 
-        val expected = ResultData.Success(newsList)
+        val expected = SuccessResultData(newsList)
         val actual = dataSource.fetchData()
 
         assertEquals(expected = expected, actual = actual)
@@ -32,7 +33,7 @@ class CloudDataSourceTest {
     @Test
     fun test_return_fail() = runBlocking {
         val service = FakeService()
-        val result = ResultData.Fail(e = Exception("error"))
+        val result = FailResultData(e = Exception("error"))
         service.result = result
 
         val dataSource = CloudDataSource(service)
@@ -46,9 +47,13 @@ class CloudDataSourceTest {
     fun test_throw_exception() = runBlocking {
         val service = FakeService()
         val dataSource = CloudDataSource(service)
-        val mapper = FakeFailMapper()
-
-        val expected = ResultDomain.Fail(DomainError.GenericError("java.lang.NullPointerException"))
+//        val mapper = FakeFailMapper()
+        val mapper = ResultDataToDomainMapper(
+            newsMapper = NewsListDataToDomainMapper(
+                itemMapper = NewsItemDataToDomainMapper()
+            )
+        )
+        val expected = FailResultDomain(GenericDomainError("java.lang.NullPointerException"))
         val actual = dataSource.fetchData().map(mapper)
 
         assertEquals(expected = expected, actual = actual)
@@ -58,9 +63,13 @@ class CloudDataSourceTest {
     fun test_long_response() = runBlocking {
         val service = NoResponseService()
         val dataSource = CloudDataSource(service)
-        val mapper = FakeFailMapper()
-
-        val expected = ResultDomain.Fail(DomainError.GenericError("kotlinx.coroutines.TimeoutCancellationException"))
+//        val mapper = FakeFailMapper()
+        val mapper = ResultDataToDomainMapper(
+            newsMapper = NewsListDataToDomainMapper(
+                itemMapper = NewsItemDataToDomainMapper()
+            )
+        )
+        val expected = FailResultDomain(GenericDomainError("kotlinx.coroutines.TimeoutCancellationException"))
         val actual = dataSource.fetchData().map(mapper)
 
         assertEquals(expected = expected, actual = actual)
@@ -79,17 +88,17 @@ private class NoResponseService : CloudService {
 
     override suspend fun fetch(): ResultData {
         delay(10000)
-        return ResultData.Fail(e = Exception())
+        return FailResultData(e = Exception())
     }
 }
-
-private class FakeFailMapper : ResultDataToDomainMapper {
-
-    override fun map(data: NewsListData): ResultDomain {
-        return ResultDomain.Success(NewsListDomain("", "", emptyList(), emptyList()))
-    }
-
-    override fun map(e: Exception): ResultDomain {
-        return ResultDomain.Fail(DomainError.GenericError(message = e.javaClass.name))
-    }
-}
+//
+//private class FakeFailMapper : ResultDataToDomainMapper {
+//
+//    override fun map(data: NewsListData): ResultDomain {
+//        return SuccessResultDomain(NewsListDomain("", "", emptyList(), emptyList()))
+//    }
+//
+//    override fun map(e: Exception): ResultDomain {
+//        return ResultDomain.Fail(DomainError.GenericError(message = e.javaClass.name))
+//    }
+//}

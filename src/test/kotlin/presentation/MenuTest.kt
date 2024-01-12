@@ -1,6 +1,9 @@
 package presentation
 
 import org.junit.jupiter.api.Test
+import presentation.menu.Menu
+import presentation.menu.MenuImpl
+import presentation.menu.MenuItem
 import kotlin.test.assertEquals
 
 /**
@@ -16,7 +19,7 @@ class MenuTest {
         val item3 = FakeItem()
         val items = listOf(item1, item2, item3)
         val reader = FakeUserInput()
-        val menu = Menu.Base(name = "menu name", items = items, userInputReader = reader)
+        val menu = MenuImpl(name = "menu name", items = items, userInputReader = reader)
 
         menu.show()
         assertEquals(expected = 1, actual = item1.showCalledCount)
@@ -36,7 +39,7 @@ class MenuTest {
         val items = listOf(item1, item2, item3)
         val reader = FakeUserInput()
         reader.result = 2
-        val menu = Menu.Base(name = "menu name", items = items, userInputReader = reader)
+        val menu = MenuImpl(name = "menu name", items = items, userInputReader = reader)
 
         menu.showForResult()
 

@@ -3,8 +3,9 @@ package domain
 import NewsListDomain
 import core.DispatchersList
 import domain.models.ResultDomain
+import domain.models.SuccessResultDomain
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -18,7 +19,7 @@ class KeywordsUseCaseTest {
     fun test() {
         val callback = Callback()
         val repository = FakeRepository()
-        repository.result = ResultDomain.Success(
+        repository.result = SuccessResultDomain(
             news = NewsListDomain(
                 name = "name",
                 location = "location",
@@ -27,7 +28,7 @@ class KeywordsUseCaseTest {
             )
         )
         val dispatchers = FakeDispatchers()
-        val useCase = KeywordsUseCase.Base(
+        val useCase = FetchKeywordsUseCaseImpl(
             repository = repository,
             dispatchers = dispatchers
         )
@@ -49,7 +50,7 @@ class KeywordsUseCaseTest {
     }
 
     private class FakeDispatchers : DispatchersList {
-        val dispatcher = TestCoroutineDispatcher()
+        val dispatcher = StandardTestDispatcher()
 
         var dispatcherIoCalledCount = 0
         override fun io(): CoroutineDispatcher {

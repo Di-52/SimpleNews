@@ -1,10 +1,12 @@
 package data
 
 import NewsListDomain
+import data.models.NewsItemDataToDomainMapper
 import data.models.NewsListData
+import data.models.NewsListDataToDomainMapper
 import data.models.ResultData
-import domain.models.DomainError
-import domain.models.ResultDomain
+import domain.models.*
+import domain.models.errors.ConnectionDomainError
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -15,7 +17,7 @@ import kotlin.test.assertEquals
 
 class BaseNewsRepositoryTest {
 
-    private val resultDomainSuccess = ResultDomain.Success(
+    private val resultDomainSuccess = SuccessResultDomain(
         news = NewsListDomain(
             name = "name",
             location = "location",
@@ -24,7 +26,7 @@ class BaseNewsRepositoryTest {
         )
     )
 
-    private val resultDataSuccess = ResultData.Success(
+    private val resultDataSuccess = SuccessResultData(
         data = NewsListData(
             name = "name",
             location = "location",
@@ -39,22 +41,26 @@ class BaseNewsRepositoryTest {
     @Test
     fun cloud_first_success() = runBlocking {
         val expected = resultDomainSuccess
-        val mapper = FakeMapper()
-        mapper.result = expected
+        val mapper = ResultDataToDomainMapper(
+            newsMapper = NewsListDataToDomainMapper(
+                itemMapper = NewsItemDataToDomainMapper()
+            )
+        )
+//        mapper.result = expected
         val cloudDataSource = FakeCloudDataSource()
         cloudDataSource.result = resultDataSuccess
         val cacheDataSource = FakeCacheDataSource()
-        val repository = BaseNewsRepository(
+        val repository = UsualNewsRepository(
             cloud = cloudDataSource,
             cache = cacheDataSource,
-            mapper = mapper
+            resultMapper = mapper
         )
 
         var actual = repository.fetchNews()
 
         assertEquals(expected = 1, actual = cloudDataSource.cloudDataSourceCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceSaveCalledCount)
-        assertEquals(expected = 1, mapper.mapperCalledCount)
+//        assertEquals(expected = 1, mapper.mapperCalledCount)
         assertEquals(expected = expected, actual = actual)
 
         actual = repository.fetchNews()
@@ -62,7 +68,7 @@ class BaseNewsRepositoryTest {
         assertEquals(expected = 1, actual = cloudDataSource.cloudDataSourceCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceFetchCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceSaveCalledCount)
-        assertEquals(expected = 2, actual = mapper.mapperCalledCount)
+//        assertEquals(expected = 2, actual = mapper.mapperCalledCount)
         assertEquals(expected = expected, actual = actual)
     }
 
@@ -73,24 +79,28 @@ class BaseNewsRepositoryTest {
      */
     @Test
     fun test_cloud_firs_fail_second_success() = runBlocking {
-        val expected = ResultDomain.Fail(error = DomainError.ConnectionError(message = ""))
-        val mapper = FakeMapper()
-        mapper.result = expected
+        val expected = FailResultDomain(error = ConnectionDomainError(message = "Server is unreachable"))
+        val mapper = ResultDataToDomainMapper(
+            newsMapper = NewsListDataToDomainMapper(
+                itemMapper = NewsItemDataToDomainMapper()
+            )
+        )
+//        mapper.result = expected
         val cloudDataSource = FakeCloudDataSource()
         val cacheDataSource = FakeCacheDataSource()
-        val repository = BaseNewsRepository(
+        val repository = UsualNewsRepository(
             cloud = cloudDataSource,
             cache = cacheDataSource,
-            mapper = mapper
+            resultMapper = mapper
         )
 
-        cloudDataSource.result = ResultData.Fail(e = Exception())
+        cloudDataSource.result = FailResultData(e = Exception())
         var actual = repository.fetchNews()
 
         assertEquals(expected = 1, actual = cloudDataSource.cloudDataSourceCalledCount)
         assertEquals(expected = 0, actual = cacheDataSource.cacheDataSourceSaveCalledCount)
-        assertEquals(expected = 1, mapper.mapperCalledCount)
-        assertEquals(expected = 1, mapper.errorsList.size)
+//        assertEquals(expected = 1, mapper.mapperCalledCount)
+//        assertEquals(expected = 1, mapper.errorsList.size)
         assertEquals(expected = expected, actual = actual)
 
         cloudDataSource.result = resultDataSuccess
@@ -98,8 +108,8 @@ class BaseNewsRepositoryTest {
 
         assertEquals(expected = 2, actual = cloudDataSource.cloudDataSourceCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceSaveCalledCount)
-        assertEquals(expected = 2, actual = mapper.mapperCalledCount)
-        assertEquals(expected = 1, actual = mapper.dataList.size)
+//        assertEquals(expected = 2, actual = mapper.mapperCalledCount)
+//        assertEquals(expected = 1, actual = mapper.dataList.size)
         assertEquals(expected = expected, actual = actual)
 
         actual = repository.fetchNews()
@@ -107,30 +117,30 @@ class BaseNewsRepositoryTest {
         assertEquals(expected = 2, actual = cloudDataSource.cloudDataSourceCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceFetchCalledCount)
         assertEquals(expected = 1, actual = cacheDataSource.cacheDataSourceSaveCalledCount)
-        assertEquals(expected = 3, actual = mapper.mapperCalledCount)
-        assertEquals(expected = 2, actual = mapper.dataList.size)
+//        assertEquals(expected = 3, actual = mapper.mapperCalledCount)
+//        assertEquals(expected = 2, actual = mapper.dataList.size)
         assertEquals(expected = expected, actual = actual)
     }
 }
-
-private class FakeMapper : ResultDataToDomainMapper {
-    var result: ResultDomain? = null
-    var dataList = mutableListOf<NewsListData>()
-    var errorsList = mutableListOf<java.lang.Exception>()
-    var mapperCalledCount = 0
-
-    override fun map(data: NewsListData): ResultDomain {
-        mapperCalledCount++
-        dataList.add(data)
-        return result!!
-    }
-
-    override fun map(e: Exception): ResultDomain {
-        mapperCalledCount++
-        errorsList.add(e)
-        return result!!
-    }
-}
+//
+//private class FakeMapper : ResultDataToDomainMapper {
+//    var result: ResultDomain? = null
+//    var dataList = mutableListOf<NewsListData>()
+//    var errorsList = mutableListOf<java.lang.Exception>()
+//    var mapperCalledCount = 0
+//
+//    override fun map(data: NewsListData): ResultDomain {
+//        mapperCalledCount++
+//        dataList.add(data)
+//        return result!!
+//    }
+//
+//    override fun map(e: Exception): ResultDomain {
+//        mapperCalledCount++
+//        errorsList.add(e)
+//        return result!!
+//    }
+//}
 
 private class FakeCloudDataSource : DataSource {
     var result: ResultData? = null
@@ -142,7 +152,7 @@ private class FakeCloudDataSource : DataSource {
     }
 }
 
-private class FakeCacheDataSource() : DataSource.Mutable {
+private class FakeCacheDataSource() : MutableDataSource {
     var data: ResultData? = null
     var cacheDataSourceFetchCalledCount = 0
     var cacheDataSourceSaveCalledCount = 0

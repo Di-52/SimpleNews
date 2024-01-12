@@ -1,14 +1,16 @@
 package domain
 
-import NewsItemDomain
+import  NewsItemDomain
 import NewsListDomain
 import core.DispatchersList
-import domain.models.DomainError
-import domain.models.ResultDomain
+import domain.mappers.ResultDomainMapper
+import domain.models.*
+import domain.models.errors.DomainError
+import domain.models.errors.GenericDomainError
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.jupiter.api.Test
-import presentation.models.ResultUi
+import presentation.models.ResultUI
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 
@@ -33,18 +35,18 @@ class UsualNewsUseCaseTest {
         ),
         keywords = listOf("key1", "key2")
     )
-    private val domainError = DomainError.GenericError(message = "")
-    private val mapperResult = ResultUi(text = "result")
+    private val domainError = GenericDomainError(message = "")
+    private val mapperResult = ResultUI(text = "result")
 
     @Test
     fun test_with_success_result() {
         val repository = FakeRepository()
-        repository.result = ResultDomain.Success(news = domainNews)
+        repository.result = SuccessResultDomain(news = domainNews)
         val dispatchers = FakeDispatchers()
         val mapper = FakeMapper()
         mapper.result = mapperResult
         val callback = Callback()
-        val useCase = UsualNewsUseCase.Base(
+        val useCase = FetchNewsUseCaseImpl(
             repository = repository,
             dispatchers = dispatchers,
             uiMapper = mapper,
@@ -65,12 +67,12 @@ class UsualNewsUseCaseTest {
     @Test
     fun test_with_fail_result() {
         val repository = FakeRepository()
-        repository.result = ResultDomain.Fail(error = domainError)
+        repository.result = FailResultDomain(error = domainError)
         val dispatchers = FakeDispatchers()
         val mapper = FakeMapper()
         mapper.result = mapperResult
         val callback = Callback()
-        val useCase = UsualNewsUseCase.Base(
+        val useCase = FetchNewsUseCaseImpl(
             repository = repository,
             dispatchers = dispatchers,
             uiMapper = mapper,
@@ -97,24 +99,24 @@ class UsualNewsUseCaseTest {
         }
     }
 
-    private class FakeMapper : ResultDomainToUiMapper {
-        var result: ResultUi? = null
+    private class FakeMapper : ResultDomainMapper {
+        var result: ResultUI? = null
         val inputData = mutableListOf<NewsListDomain>()
         val inputErrors = mutableListOf<DomainError>()
 
-        override fun map(data: NewsListDomain): ResultUi {
+        override fun map(data: NewsListDomain): ResultUI {
             inputData.add(data)
             return result!!
         }
 
-        override fun map(error: DomainError): ResultUi {
+        override fun map(error: DomainError): ResultUI {
             inputErrors.add(error)
             return result!!
         }
     }
 
     private class FakeDispatchers : DispatchersList {
-        val dispatcher = TestCoroutineDispatcher()
+        val dispatcher = StandardTestDispatcher()
 
         var dispatcherIoCalledCount = 0
         override fun io(): CoroutineDispatcher {
