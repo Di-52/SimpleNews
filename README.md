@@ -1,5 +1,5 @@
 # Simple News
-This is test task for start education with kiparo.com
+Test task.
 
 ## Task: 
 We are need to create console application on Java or Kotlin.
